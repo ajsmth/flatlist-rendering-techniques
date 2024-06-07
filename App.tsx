@@ -1,5 +1,6 @@
 import * as React from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { create } from "zustand";
 
 type Item = {
   id: string;
@@ -12,32 +13,33 @@ let createItems = (): Item[] =>
     name: `Item ${i}`,
   }));
 
+let data = createItems();
 
-let data = createItems()
+type SelectedIdsStore = {
+  selectedIds: Record<string, boolean>;
+};
 
+let useSelectedIdsStore = create<SelectedIdsStore>((set) => ({
+  selectedIds: {},
+}));
+
+let useIsItemSelected = (id: string) =>
+  useSelectedIdsStore((state) => state.selectedIds[id]);
+
+let toggleId = (id: string) =>
+  useSelectedIdsStore.setState((state) => {
+    return {
+      selectedIds: {
+        ...state.selectedIds,
+        [id]: !state.selectedIds[id],
+      },
+    };
+  });
 
 export default function App() {
-  let [selectedIds, setSelectedIds] = React.useState<string[]>([]);
-
-  let toggleId = React.useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((i) => i !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
+  let renderItem = React.useCallback(({ item }: { item: Item }) => {
+    return <FlatlistRow {...item} toggleId={toggleId} />;
   }, []);
-
-  let renderItem = React.useCallback(
-    ({ item }: { item }) => {
-      let isSelected = selectedIds.includes(item.id);
-      return (
-        <FlatlistRow {...item} isSelected={isSelected} toggleId={toggleId} />
-      );
-    },
-    [toggleId, selectedIds]
-  );
 
   return (
     <View style={{ paddingTop: 64 }}>
@@ -49,14 +51,14 @@ export default function App() {
 const FlatlistRow = React.memo(function FlatlistRow({
   id,
   name,
-  isSelected,
   toggleId,
 }: {
   id: string;
   name: string;
-  isSelected: boolean;
   toggleId: (id: string) => void;
 }) {
+  let isSelected = useIsItemSelected(id);
+
   return (
     <TouchableOpacity
       style={{
