@@ -1,6 +1,6 @@
 import * as React from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
-import { create, createStore, useStore } from "zustand";
+import { createStore, useStore } from "zustand";
 
 type Item = {
   id: string;
@@ -19,20 +19,6 @@ type SelectedIdsStore = {
   selectedIds: Record<string, boolean>;
 };
 
-let useSelectedIdsStore = create<SelectedIdsStore>((set) => ({
-  selectedIds: {},
-}));
-
-function createSelectedIdsStore() {
-  let store = createStore<SelectedIdsStore>(() => {
-    return {
-      selectedIds: {},
-    };
-  });
-
-  return store;
-}
-
 let StoreContext = React.createContext(createSelectedIdsStore());
 
 let useIsItemSelected = (id: string) => {
@@ -49,13 +35,6 @@ function createSelectedIdsStore() {
 
   return store;
 }
-
-let StoreContext = React.createContext(createSelectedIdsStore());
-
-let useIsItemSelected = (id: string) => {
-  let storeContext = React.useContext(StoreContext);
-  return useStore(storeContext, (state) => state.selectedIds[id]);
-};
 
 export default function App() {
   let storeRef = React.useRef(createSelectedIdsStore());
@@ -69,11 +48,14 @@ export default function App() {
         },
       };
     });
-  }, [])
+  }, []);
 
-  let renderItem = React.useCallback(({ item }: { item: Item }) => {
-    return <FlatlistRow {...item} toggleId={toggleId} />;
-  }, [toggleId]);
+  let renderItem = React.useCallback(
+    ({ item }: { item: Item }) => {
+      return <FlatlistRow {...item} toggleId={toggleId} />;
+    },
+    [toggleId]
+  );
 
   return (
     <StoreContext.Provider value={storeRef.current}>
