@@ -19,6 +19,27 @@ type SelectedIdsStore = {
   selectedIds: Record<string, boolean>;
 };
 
+let useSelectedIdsStore = create<SelectedIdsStore>((set) => ({
+  selectedIds: {},
+}));
+
+function createSelectedIdsStore() {
+  let store = createStore<SelectedIdsStore>(() => {
+    return {
+      selectedIds: {},
+    };
+  });
+
+  return store;
+}
+
+let StoreContext = React.createContext(createSelectedIdsStore());
+
+let useIsItemSelected = (id: string) => {
+  let storeContext = React.useContext(StoreContext);
+  return useStore(storeContext, (state) => state.selectedIds[id]);
+};
+
 function createSelectedIdsStore() {
   let store = createStore<SelectedIdsStore>(() => {
     return {
