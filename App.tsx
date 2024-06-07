@@ -40,15 +40,22 @@ let useIsItemSelected = (id: string) => {
   return useStore(storeContext, (state) => state.selectedIds[id]);
 };
 
-let toggleId = (id: string) =>
-  useSelectedIdsStore.setState((state) => {
+function createSelectedIdsStore() {
+  let store = createStore<SelectedIdsStore>(() => {
     return {
-      selectedIds: {
-        ...state.selectedIds,
-        [id]: !state.selectedIds[id],
-      },
+      selectedIds: {},
     };
   });
+
+  return store;
+}
+
+let StoreContext = React.createContext(createSelectedIdsStore());
+
+let useIsItemSelected = (id: string) => {
+  let storeContext = React.useContext(StoreContext);
+  return useStore(storeContext, (state) => state.selectedIds[id]);
+};
 
 export default function App() {
   let storeRef = React.useRef(createSelectedIdsStore());
