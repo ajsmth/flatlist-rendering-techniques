@@ -15,7 +15,6 @@ let createItems = (): Item[] =>
 
 let data = createItems()
 
-let SelectedIdsContext = React.createContext<string[]>([]);
 
 export default function App() {
   let [selectedIds, setSelectedIds] = React.useState<string[]>([]);
@@ -32,32 +31,32 @@ export default function App() {
 
   let renderItem = React.useCallback(
     ({ item }: { item }) => {
-      return <FlatlistRow {...item} toggleId={toggleId} />;
+      let isSelected = selectedIds.includes(item.id);
+      return (
+        <FlatlistRow {...item} isSelected={isSelected} toggleId={toggleId} />
+      );
     },
-    [toggleId]
+    [toggleId, selectedIds]
   );
 
   return (
-    <SelectedIdsContext.Provider value={selectedIds}>
-      <View style={{ paddingTop: 64 }}>
-        <FlatList data={data} renderItem={renderItem} />
-      </View>
-    </SelectedIdsContext.Provider>
+    <View style={{ paddingTop: 64 }}>
+      <FlatList data={data} renderItem={renderItem} />
+    </View>
   );
 }
 
-function FlatlistRow({
+const FlatlistRow = React.memo(function FlatlistRow({
   id,
   name,
+  isSelected,
   toggleId,
 }: {
   id: string;
   name: string;
+  isSelected: boolean;
   toggleId: (id: string) => void;
 }) {
-  let selectedIds = React.useContext(SelectedIdsContext);
-  let isSelected = selectedIds.includes(id);
-
   return (
     <TouchableOpacity
       style={{
@@ -72,4 +71,4 @@ function FlatlistRow({
       {isSelected && <Text>Selected</Text>}
     </TouchableOpacity>
   );
-}
+});
